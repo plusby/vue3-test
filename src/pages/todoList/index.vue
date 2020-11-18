@@ -105,7 +105,7 @@ export default {
             left: 15%;
             top: 15%;
         }
-        
+
         .entry-wrap{
             display: flex;
             justify-content: space-between;

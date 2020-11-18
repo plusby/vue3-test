@@ -33,3 +33,12 @@ export function filterData(list, type = 'all'){
         })
     }
 }
+
+export function delay(){
+    return new Promise(res=>{
+        const time = Math.abs(Math.random()*10-1)*1000
+        setTimeout(()=>{
+            res()
+        },time)
+    })
+}

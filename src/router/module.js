@@ -1,8 +1,8 @@
 import { defineAsyncComponent } from 'vue'
 import Loading from '../pages/home/componets/loading.vue'
 import { delay } from '../utils/todoStorage'
-
 import TodoList from '../pages/todoList/index.vue';
+import Reactive from '../pages/reactive/index.vue'
 
 // 异步路由 初始加载的时候会异步获取，以后都是读取缓存
 const Home = defineAsyncComponent({
@@ -49,6 +49,8 @@ const SelectList = defineAsyncComponent({
     loadingComponent: Loading, // 加载时的显示的组件
 })
 
+
+
 export default [
     {
         path: '/',
@@ -69,5 +71,9 @@ export default [
     {
         path: '/TodoList',
         component: TodoList
+    },
+    {
+        path: '/Reactive',
+        component: Reactive
     }
 ]

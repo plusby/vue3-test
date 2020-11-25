@@ -4,6 +4,7 @@
   <router-link to="/SelectList">selectList</router-link>
   <router-link to="/Mark">mark</router-link>
   <router-link to="/Reactive">Reactive</router-link>
+  <router-link to="/CompositionApi">CompositionApi</router-link>
   <router-view></router-view>
 </template>
 

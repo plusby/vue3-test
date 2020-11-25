@@ -5,6 +5,7 @@ import 'nprogress/nprogress.css'
 // import NProgress from 'nprogress'
 import './index.css'
 
+
 // 进度条配置
 // NProgress.configure({
 //     trickleSpeed: 50, //增长速度

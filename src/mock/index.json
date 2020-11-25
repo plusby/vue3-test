@@ -1,0 +1,24 @@
+{
+    "arr": [
+        {
+            "country": "美国",
+            "value": 12
+        },
+        {
+            "country": "中国",
+            "value": 24
+        },
+        {
+            "country": "日本",
+            "value": 18
+        },
+        {
+            "country": "英国",
+            "value": 16
+        },
+        {
+            "country": "德国",
+            "value": 10
+        }
+    ]
+}

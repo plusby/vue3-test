@@ -69,6 +69,7 @@ export default {
     },
     setup(){
         let gdp = ref([])
+       
         console.log(1)
         async function getList(){
             console.log(2)
@@ -76,8 +77,19 @@ export default {
                 console.log(err)
             })
             gdp.value = gdp.value.arr
-            console.log(3)
+            console.log(3,gdp.value)
         }
+        //  let gdp = reactive([])
+        //  console.log(1,gdp)
+        // async function getList(){
+        //     console.log(2)
+        //     const gdpArr = await fetch('/src/mock/index.json').then(res=>res.json(),err=>{
+        //         console.log(err)
+        //     })
+        //     gdp = gdpArr.arr
+        //     console.log(3,gdp)
+        // }
+
 
         getList()
         console.log(4)

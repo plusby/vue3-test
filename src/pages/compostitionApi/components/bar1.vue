@@ -16,8 +16,9 @@ export default {
     setup(props){
         console.log('props',props.gdp)
         const gdpRef = computed(()=>props.gdp)
+       const { gdpArr } = useGdp(gdpRef,300) 
         return {
-            ...useGdp(gdpRef,300) 
+           gdpArr
         }
     }
 }

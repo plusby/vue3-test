@@ -4,6 +4,7 @@ import { delay } from '../utils/todoStorage'
 import TodoList from '../pages/todoList/index.vue';
 import Reactive from '../pages/reactive/index.vue'
 import CompositionApi from '../pages/compostitionApi/index.vue'
+import Login from '../pages/Login/index.vue'
 
 // 异步路由 初始加载的时候会异步获取，以后都是读取缓存
 const Home = defineAsyncComponent({
@@ -80,5 +81,9 @@ export default [
     {
         path: '/CompositionApi',
         component: CompositionApi
+    },
+    {
+        path: '/Login',
+        component: Login
     }
 ]

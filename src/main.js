@@ -4,6 +4,8 @@ import App from './App.vue'
 import 'nprogress/nprogress.css'
 // import NProgress from 'nprogress'
 import './index.css'
+import store from './vuex/index'
+import {provideStore} from './vuex/userLoginProvideInject'
 
 
 // 进度条配置
@@ -20,5 +22,6 @@ vue3中不再提供vue构造函数，而是提供一个createApp函数，
 不再是vue组件实例
 */
 const app = createApp(App)
-app.use(Route)
+app.use(Route).use(store)
+provideStore(app) // provide和inject实现全局数据共享
 app.mount('#app')

@@ -114,9 +114,31 @@
            旧Block tree
             [动态节点1.动态节点2]
 
-    5. PatchFlag
-        记录父节点下的动态子节点上的动态属性或内容，新旧节点对比的时候静态的属性或内容不进行比较，
-        只比较动态节点下的动态属性或内容
+    5. PatchFlag(静态标记)
+        vue2:
+          虚拟dom进行全量比较
+        vue3:
+          记录父节点下的动态子节点上的动态属性或内容(添加标记PatchFlag)，新旧节点对比的时候静态的属性或内容不进行比较，
+          只比较动态节点下的动态属性或内容
+          通过以下网站可以看出vue3的虚拟dom的创建https://vue-next-template-explorer.netlify.app/
+
+        PatchFlag：
+          export const enum PatchFlags {
+            TEXT = 1, // 动态文本节点
+            CLASS = 1 《 2, // 2 // 动态class
+            STYLE = 1 《 2, // 4 // 动态style
+            PROPS = 1 《 3, // 8 // 动态属性，但不包含类名和样式
+            FULL_PROPS = 1 《 4, // 16 具有动态key属性，当key改变的时候，需要进行完整的diff比较
+            HYDRATE_EVENTS = 1 《 5, //32 //带有监听事件的节点
+            STABLE_FRAGMENT = 1 《 6, //64 // 一个不会改变子节点顺序的fragment
+            KEYED_FRAGMENT = 1 《 7, // 128 带有key属性的fragment或部分子节点带有key
+            UNKEYED_FRAGMENT = 1 《 8,  // 256 子节点没有key的fragment
+            NEED_PATCH = 1 《 9, // 512 一个节点只会进行非props比较
+            DYNAMIC_SLOTS = 1 《 10, 1024 动态slot
+            HOISTED = -1, // 静态节点
+            BAIL = -2, // 指示在diff过程应该要退出优化模式
+          }
+
 
     6. vue3中为什么要去掉Vue构造函数
         1. 在vue2构造函数的静态方法中挂载的组件或方法都会在vue应用中生效，不利于隔离
@@ -138,12 +160,31 @@
         到成员的新增和删除，因此在Vue3中新增成员、删除成员、索引访问等均可触发重新渲染，
         而在vue2中无法做到，必须使用$set或者splice方法来处理新增和删除的响应；
 
+    8. setup函数
+        是组合api的入口函数
+        setup函数的执行是在beforeCreate之前，因此
+        在setup函数中无法使用data和methods，因为此时还没有初始化
+        data和methods.
+        setup函数只能是同步的，不能是异步的,如果想要实现异步，只能在setup中定义使用异步函数
+
   </pre>
 </template>
 
 <script>
 export default {
-
+  beforeCreate(){
+    console.log('beforeCreate')
+  },
+  created(){
+    console.log('created')
+  },
+  setup(){
+    console.log('setup')
+  },
+  beforeRouteEnter(to, from, next){
+    console.log('beforeRouteEnter')
+    next()
+  },
 }
 </script>
 

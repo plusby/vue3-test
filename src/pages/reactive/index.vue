@@ -3,6 +3,9 @@
   <p>{{ state.a.c }}</p>
   <p @click="changeStateF">点击改变state的f</p>
   <p>{{ state.f }}</p>
+  <p>objShallowReactive.aa:{{objShallowReactive.aa}}</p>
+  <p>objShallowReactive.a.c.d:{{objShallowReactive.a.c.d}}</p>
+  <p @click="changeObjShallowReactive">改变objShallowReactive.a.c.d</p>
   <pre>
     <h2>reactive API</h2>
     <p>使数据具有响应式</p>
@@ -14,12 +17,15 @@
             ref
             computed
             watchEffect
-            watch
+            watch,
+            shallowReactive,
+            shallowRef,
+            triggerRef
     </p>
     <h3>1. reactive</h3>
     <p>
         参数： 接收一个对象
-            深度代理对象中的所有属性，不能代理基本类型的数据
+            递归深度代理对象中的所有属性，不能代理基本类型的数据
         返回一个代理对象
     </p>
     <h3>2. readonly</h3>
@@ -296,12 +302,40 @@
                     ...useWork()
                 }
             }
+    <h3>13. shallowReactive</h3>
+        非深度代理对象属性，只代理对象的第一层，只有第一层改变的时候才能渲染视图更新, 大量数据优化的时候可以使用这个方法
 
+        const obj = shallowReactive({a:{b:2,c:{d:3}},aa:22})
+        obj.b = 3 //  视图不会被更新
+        obj.aa = 222 // 视图更新
+
+    <h3>14. shallowRef</h3>
+        非深度代理对象属性，只代理value,只有value改变的时候才能渲染视图更新, 大量数据优化的时候可以使用这个方法
+
+    <h3>15. triggerRef</h3>
+        triggerRef(ref)
+        主动触发视图更新,如果只想通过shallowRef来改变某一层的数据，并且需要视图更新可以使用这个方法
+
+    <h3>16. toRaw</h3>
+        const originState = toRaw(ref.value或reactive)
+        获得响应式对象的原始数据，用于性能优化，如果只是改变原数据中的属性，但是不更新视图，那么就没有必要让视图更新从而提高了性能
+        const state = {a:1} 
+        const stateRef = ref(state)
+        let state2 = toRaw(stateRef.value)
+        state2 === state // true
+
+    <h3>17. markRaw</h3>
+        markRaw(对象)  
+        使原始对象不能够被代理
+        const state = {a:1}
+        state = markRaw(state)
+        const stateRef = ref(state)
+        stateRef.a = 2 // 视图不会被更新
   </pre>
 </template>
 
 <script>
-import { watch, reactive, ref, readonly, computed, watchEffect, warn, toRef } from 'vue'
+import { watch, reactive, ref, readonly, computed, watchEffect, warn, toRef,shallowReactive, shallowRef, triggerRef } from 'vue'
 export default {
     setup(){
         const state = reactive({a:{c:3}, b: 2, d: 3, f: 4})
@@ -468,6 +502,28 @@ export default {
         console.log(toRefstate) // Proxy {a: 3, b: 2}
         console.log(toRefstateRef) // {_object: Proxy, _key: "a", __v_isRef: true}
         console.log(toRefstate.a) // 3
+        
+        // 13. shallowReactive
+        const objShallowReactive = shallowReactive({a:{b:2,c:{d:3}},aa:22})
+        const changeObjShallowReactive = () => {
+            objShallowReactive.a.c.d = 'ddd' //  视图不会被更新
+            // objShallowReactive.aa = 222 // 视图更新
+            console.log(objShallowReactive.a)
+            console.log(objShallowReactive.a.c.d)
+            
+        }
+
+        // 14. shallowRef
+        const objShallowRef = shallowRef({a:{b:2,c:{d:3}},aa:22})
+        const changeObjShallowRef = () => {
+            objShallowRef.value = {a:{b:2,c:{d:'dddd'}},aa:22} //  视图会被更新
+            // objShallowRef.value.aa = 222 // 视图不会被更新
+            // triggerRef(objShallowRef) // 触发视图更新
+            console.log(objShallowRef.value.a)
+            console.log(objShallowRef.value.a.c.d)
+            
+        }
+
 
 
         return {    
@@ -475,7 +531,9 @@ export default {
             state,
             newStateVal,
             oldStateVal,
-            changeStateF
+            changeStateF,
+            objShallowReactive,
+            changeObjShallowReactive
         }
     }
 }

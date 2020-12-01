@@ -6,6 +6,9 @@
   <p>objShallowReactive.aa:{{objShallowReactive.aa}}</p>
   <p>objShallowReactive.a.c.d:{{objShallowReactive.a.c.d}}</p>
   <p @click="changeObjShallowReactive">改变objShallowReactive.a.c.d</p>
+  <p>toRefstateRef {{toRefstateRef}}</p>
+  <p>toRefstateObjRef: {{toRefstateObjRef}}</p>
+  <p @click="toRefstateRefFn">改变toRefstateRef</p>
   <pre>
     <h2>reactive API</h2>
     <p>使数据具有响应式</p>
@@ -40,6 +43,19 @@
             如果传递的是一个对象则内部会通过调用reactive进行代理
             如果传递的是一个代理对象，则直接返回这个代理对象
         返回一个对象{ value: 代理对象 }
+
+        通过ref获取dom元素
+        <div ref="dom">123</div>
+
+        setup(){
+            const dom = ref(null)
+            onMounted(){ // dom元素渲染之后再获取使用
+                console.log(dom.value) // div元素
+            }
+            return {
+                dom
+            }
+        }
 
     <h3>4.  computed</h3>
     <p>
@@ -247,16 +263,26 @@
         unref(val) 等同于isRef(val) ? val.value: val
         
     <h3>11. toRef</h3>
-        让指定的属性转换为Ref响应式格式
+        让指定对象的属性转换为Ref响应式格式,如果指定对象不是响应式的那么改变了toRef转换之后的属性不会更新视图,
+        但是原始数据下的这个属性也会变化
 
+        eg:1
         const state = reactive({a:1,b:2})
         const stateRef = toRef(state, 'a')
-        stateRef.value++
-        state.value++
+        stateRef.value++ // 会更新视图
+        console.log(state.a) // 3 // 原始数据的a变成了3
+
+        eg:2
+        const state = {a:1} // 不是响应式的
+        const stateRef = toRef(state,'a')
+        stateRef++  // 视图不会被更新
         console.log(state.a) // 3
 
     <h3>12. toRefs</h3>
-        把一个响应式对象的所有属性转换为ref格式，然后包装到一个plain-object中返回
+        把一个响应式对象的所有属性转换为ref格式，然后包装到一个plain-object中返回,
+        如果指定对象不是响应式的那么改变了toRef转换之后的属性不会更新视图,
+        但是原始数据下的这个属性也会变化
+
         const state = reactive({a:1,b:2})
         const stateAsRefs = toRefs(state)
         console.log(stateAsRefs) // {a: {value: xx}, b:{value:xx}}
@@ -331,6 +357,57 @@
         state = markRaw(state)
         const stateRef = ref(state)
         stateRef.a = 2 // 视图不会被更新
+
+    <h3>18. customRef</h3>
+        自定义Ref，返回一个Ref, 可以显示的控制返回的值和显示的值，也可控制是否视图更新
+        格式：
+            function myRef(value){
+                return customRef((track, trigger)=>{
+                    return {
+                        set(newsVal){ // 修改数据
+                            // ...逻辑处理
+                            value = newsVal
+                            trigger() // 触发视图更新
+                        },
+                        get(){ // 获取数据
+                           track() // 追踪数据的变化
+                           // ...逻辑处理
+                           return value     
+                        }
+                    }
+                })
+            }
+            const state = myRef(1)
+
+        应用：
+            解决setup不能是异步的问题
+            function myRef(value){
+                return customRef((track, trigger)=>{
+                    // 异步请求数据
+                    fetch(value).then(res=>(res.json())).then((res)=>{
+                        value = res.data
+                        trigger() // 触发更新视图
+                    }).catch(err)   
+                    return {
+                        set(newsVal){ // 修改数据
+                            value = newsVal
+                            trigger() // 触发视图更新
+                        },
+                        get(){ // 获取数据
+                           track() // 追踪数据的变化
+                           return value     
+                        }
+                    }
+                })
+            }
+
+            setup(){
+                cosnt data = myRef('/api/books')
+
+                return{
+                    data
+                }
+            }
   </pre>
 </template>
 
@@ -341,42 +418,45 @@ export default {
         const state = reactive({a:{c:3}, b: 2, d: 3, f: 4})
         const newStateVal = ref(state)
         const oldStateVal = ref(state)
-        // watch(state.a,(newval, oldval)=>{
-        //     console.log('新', newval, '旧', oldval)
-        //     newStateVal.value.a = newval
-        //     oldStateVal.value.a = oldval
-        // })
+        const stateObjVal = ref(state.a)
+        stateObjVal.value.c++
+        console.log('stateObjVal',stateObjVal.value.c,state.a.c) // 4 4
+        watch(state.a,(newval, oldval)=>{
+            console.log('新', newval, '旧', oldval)
+            newStateVal.value.a = newval
+            oldStateVal.value.a = oldval
+        })
         const changeState = () => {
             state.a.c ++ 
         }
 
-        // state.d++
+        state.d++
 
-        // watch(()=>(state.f),(newVal,oldVal)=>{
-        //     console.log('新3', newVal, '旧3', oldVal) // 新3 5 旧3 4
-        // })
+        watch(()=>(state.f),(newVal,oldVal)=>{
+            console.log('新3', newVal, '旧3', oldVal) // 新3 5 旧3 4
+        })
 
         const changeStateF = () => {
             state.f ++ 
         }
         
         // readonly代理一个代理对象
-        // const reactiveObj = reactive({a:1, b: 2})
-        // reactiveObj.a++ 
-        // const stateRef = readonly(reactiveObj)
-        // console.log(stateRef.a)   // 2
-        // reactiveObj.a++ 
-        // console.log(stateRef.a)   // 3
-        // console.log('reactiveObj == stateRef',reactiveObj == stateRef) // false
+        const reactiveObj = reactive({a:1, b: 2})
+        reactiveObj.a++ 
+        const stateRef = readonly(reactiveObj)
+        console.log(stateRef.a)   // 2
+        reactiveObj.a++ 
+        console.log(stateRef.a)   // 3
+        console.log('reactiveObj == stateRef',reactiveObj == stateRef) // false
 
         // 2. ref传递一个对象，内部调用使用reactive进行数据响应
-        // const objrefReactive = {a:1,b:{c:2}}
-        // const refReactive = reactive(objrefReactive)
-        // const refToObj = ref(objrefReactive) 
-        // const refToObj2 = ref(refReactive) 
-        // console.log('objrefReactive === refReactive',refReactive === objrefReactive) // false
-        // console.log('refReactive === refToObj',refReactive === refToObj.value) // true
-        // console.log('refReactive === refToObj',refReactive === refToObj2.value) // true
+        const objrefReactive = {a:1,b:{c:2}}
+        const refReactive = reactive(objrefReactive)
+        const refToObj = ref(objrefReactive) 
+        const refToObj2 = ref(refReactive) 
+        console.log('objrefReactive === refReactive',refReactive === objrefReactive) // false
+        console.log('refReactive === refToObj',refReactive === refToObj.value) // true
+        console.log('refReactive === refToObj',refReactive === refToObj2.value) // true
 
         // // 3. computed 有缓存，依赖的响应式数据变化的时候下次使用才会执行
         // const computedObj = { a:1 ,b :2}
@@ -496,12 +576,21 @@ export default {
 
         // 9. toRef
         const toRefstate = reactive({a:1,b:2})
+        const toRefStateObj = {a:1}
+        const toRefstateObjRef = toRef(toRefStateObj, 'a')
         const toRefstateRef = toRef(toRefstate, 'a')
-        toRefstateRef.value++
-        toRefstate.value++
-        console.log(toRefstate) // Proxy {a: 3, b: 2}
-        console.log(toRefstateRef) // {_object: Proxy, _key: "a", __v_isRef: true}
-        console.log(toRefstate.a) // 3
+        const toRefstateRefFn = () => {
+            toRefstateRef.value++
+        // toRefstate.value++
+            console.log(toRefstate) // Proxy {a: 3, b: 2}
+            console.log(toRefstateRef) // {_object: Proxy, _key: "a", __v_isRef: true}
+            console.log(toRefstate.a) // 3
+        }
+        const toRefstateObjRefFn = () => {
+            toRefstateObjRef.value++ // 如果原数据不是响应式的，那么不会更新视图ui
+            console.log('toRefstateObjRef',toRefstateObjRef)
+            console.log('toRefStateObj',toRefStateObj)
+        }
         
         // 13. shallowReactive
         const objShallowReactive = shallowReactive({a:{b:2,c:{d:3}},aa:22})
@@ -533,7 +622,10 @@ export default {
             oldStateVal,
             changeStateF,
             objShallowReactive,
-            changeObjShallowReactive
+            changeObjShallowReactive,
+            toRefstateRef,
+            toRefstateObjRef,
+            toRefstateRefFn
         }
     }
 }

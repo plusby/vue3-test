@@ -408,6 +408,109 @@
                     data
                 }
             }
+
+        <h3>13. shallowReadonly</h3>
+            只让第一层属性不能修改
+
+        <h3>14. vue3中响应数据</h3>
+            通过proxy进行代理，
+            let obj = {a:1}
+            let state = new Proxy(obj,{
+                get(obj,key){
+                    return obj[key]
+                },
+                set(obj,key,value){
+                    obj[key] = value
+                    // 更新ui
+                    return true // 返回赋值成功，否则下次赋值就会失败报错
+                }
+            })
+            
+            // 实现shallowReactive
+            const shallowReactive = function(obj){
+                return new Proxy(obj,{
+                    get(obj,key){
+                        return obj[key]
+                    },
+                    set(obj,key,value){
+                        obj[key] = value
+                        // 更新ui
+                        console.log('更新ui')
+                        return true // 返回赋值成功，否则下次赋值就会失败报错
+                    }
+                })
+            }
+
+            // 实现shallowRef
+            const shallowRef = function(val){
+                return shallowReactive({value:val})
+            }
+
+            // 实现reactive
+            const reactive = function(obj){
+                if(typeof obj === 'object'){ // reactive传递的必须是一个对象，否则报错
+                    if(Object.prototype.toString.call(obj) === "[object Object]"){ // 是否是对象
+                        for(let key in obj){
+                            if(typeof obj[key] === 'object'){
+                                obj[key] = reactive(obj[key])
+                            }    
+                        }
+                    }else{ // 否则就是数组
+                        obj.forEach((item,index)=>{
+                            if(typeof item === 'object'){
+                                obj[index] = reactive(item)
+                            }
+                        })
+                    }
+                }else{
+                    new Error('params is not a Object')
+                }
+                return new Proxy(obj,{
+                    get(obj,key){
+                        return obj[key]
+                    },
+                    set(obj,key,value){
+                        obj[key] = value
+                        // 更新ui
+                        console.log('更新ui')
+                        return true // 返回赋值成功，否则下次赋值就会失败报错
+                    }
+                })
+            }
+
+            // 实现ref
+            const ref = function(val){
+                return reactive({value:val})
+            }
+
+            // 实现readonly
+            const readonly = function(obj){
+                if(typeof obj === 'object'){ // reactive传递的必须是一个对象，否则报错
+                    if(Object.prototype.toString.call(obj) === "[object Object]"){ // 是否是对象
+                        for(let key in obj){
+                            if(typeof obj[key] === 'object'){
+                                obj[key] = reactive(obj[key])
+                            }    
+                        }
+                    }else{ // 否则就是数组
+                        obj.forEach((item,index)=>{
+                            if(typeof item === 'object'){
+                                obj[index] = reactive(item)
+                            }
+                        })
+                    }
+                }else{
+                    new Error('params is not a Object')
+                }
+                return new Proxy(obj,{
+                    get(obj,key){
+                        return obj[key]
+                    },
+                    set(obj,key,value){
+                       console.warn(`${obj} is readonly`)
+                    }
+                })
+            }
   </pre>
 </template>
 

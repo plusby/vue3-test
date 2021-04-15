@@ -25,3 +25,9 @@ const app = createApp(App)
 app.use(Route).use(store)
 provideStore(app) // provide和inject实现全局数据共享
 app.mount('#app')
+// 自定义指令
+app.directive('highlight', {
+    beforeMount(el, binding, vnode) {
+      el.style.background = binding.value
+    }
+})

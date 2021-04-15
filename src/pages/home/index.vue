@@ -8,7 +8,11 @@
         <Card3 />
       </div>
       <div>
-          <Card4></Card4>
+          <Card4 :options="optionsWrap.options" :name="name"></Card4>
+          <Card4 :options="optionsWrap.options" :name="obj.name.value"></Card4>
+          <template v-for="(item,index) in arr" :key="index" >
+              <Card4 :options="optionsWrap.options" :name="item.name.value"></Card4>
+          </template>
       </div>
       <div>
         <Card5 />
@@ -16,6 +20,7 @@
       <div>卡片5</div>
       <div>卡片6</div>
       <div>卡片7</div>
+      <button @click="change">修改传递属性的ref的值</button>
       <!-- Teleport将子元素插入到指定元素的里面的最后
             将section元素放到body元素里面的最后
        -->
@@ -71,9 +76,55 @@ export default {
         Card5,
     },
     setup(){
+        const options = [
+            { 
+                name: '1',
+                value: ref(''),
+            },
+            { 
+                name: '2',
+                value: ref(''),
+            },
+            { 
+                name: '3',
+                value: ref(''),
+            },
+        ]
         const maskFlag = ref(false)
+
+        const optionsWrap = {
+            options
+        }
+
+        const obj = {
+            name: ref('我是对象name')
+        }
+        const name =  ref('我是字符串name')
+
+        const arr = [
+            {
+                name: ref('我是对象name')
+            },
+            {
+                name: ref('我是对象name2')
+            }
+        ]
+
+        const change = () => {
+            optionsWrap.options.forEach(item=>{
+                item.value.value = 6
+            })
+            console.log('3',options)
+        }
+
         return {
-            maskFlag
+            maskFlag,
+            options,
+            change,
+            optionsWrap,
+            obj,
+            name,
+            arr,
         }
     }
 }

@@ -16,7 +16,7 @@
   <pre>
     效率提升
     1. 静态提升
-        静态元素提升到render前面，每次更新渲染的时候不再重新创建，提升创建虚拟dom和diff对比的时间
+        静态元素提升到render前面; 所以每次更新渲染的时候不再重新创建这些静态元素，从而提升了创建虚拟dom和diff对比的时间
 
         静态节点：
 
@@ -163,8 +163,7 @@
     8. setup函数
         是组合api的入口函数
         setup函数的执行是在beforeCreate之前，因此
-        在setup函数中无法使用data和methods，因为此时还没有初始化
-        data和methods.
+        在setup函数中无法使用data和methods，因为此时还没有初始化data和methods.
         setup函数只能是同步的，不能是异步的,如果想要实现异步，只能在setup中定义使用异步函数
 
   </pre>

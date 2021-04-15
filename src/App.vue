@@ -7,6 +7,8 @@
   <router-link to="/CompositionApi">CompositionApi</router-link>
   <span>用户名:{{ user && user.name }} <i v-if="user" @click.prevent="loginOut">退出</i></span>
   <router-link to="/Login" v-if="!user">登录</router-link>
+  <router-link to="/Attrs">attrs的变化</router-link>
+  <router-link to="/Directive">自定义指令</router-link>
   <router-view></router-view>
 
 </template>

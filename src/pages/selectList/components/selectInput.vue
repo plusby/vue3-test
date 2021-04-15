@@ -30,7 +30,6 @@ export default {
             } else {
                 cxt.emit('update:title', e.target.value)
             }
-            
         }
 
         return{

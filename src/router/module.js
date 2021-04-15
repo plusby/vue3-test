@@ -5,6 +5,8 @@ import TodoList from '../pages/todoList/index.vue';
 import Reactive from '../pages/reactive/index.vue'
 import CompositionApi from '../pages/compostitionApi/index.vue'
 import Login from '../pages/Login/index.vue'
+import Attrs from '../pages/attrs/index.vue'
+import Directive from '../pages/directive/index.vue'
 
 // 异步路由 初始加载的时候会异步获取，以后都是读取缓存
 const Home = defineAsyncComponent({
@@ -85,5 +87,13 @@ export default [
     {
         path: '/Login',
         component: Login
+    },
+    {
+        path: '/Attrs',
+        component: Attrs
+    },
+    {
+        path: '/Directive',
+        component: Directive
     }
 ]

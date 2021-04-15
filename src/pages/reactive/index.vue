@@ -280,7 +280,7 @@
 
     <h3>12. toRefs</h3>
         把一个响应式对象的所有属性转换为ref格式，然后包装到一个plain-object中返回,
-        如果指定对象不是响应式的那么改变了toRef转换之后的属性不会更新视图,
+        如果指定对象不是响应式的,那么通过toRef转换之后的属性不会更新视图,
         但是原始数据下的这个属性也会变化
 
         const state = reactive({a:1,b:2})
@@ -515,7 +515,7 @@
 </template>
 
 <script>
-import { watch, reactive, ref, readonly, computed, watchEffect, warn, toRef,shallowReactive, shallowRef, triggerRef } from 'vue'
+import { markRaw, watch, reactive, ref, readonly, computed, watchEffect, warn, toRef,shallowReactive, shallowRef, triggerRef, isReactive } from 'vue'
 export default {
     setup(){
         const state = reactive({a:{c:3}, b: 2, d: 3, f: 4})
@@ -696,13 +696,15 @@ export default {
         }
         
         // 13. shallowReactive
-        const objShallowReactive = shallowReactive({a:{b:2,c:{d:3}},aa:22})
+        const shallowReactiveOriginObj = {a:{b:2,c:{d:3}},aa:22}
+        const objShallowReactive = shallowReactive(shallowReactiveOriginObj)
+        // const objShallowReactive =  shallowReactive(reactive(shallowReactiveOriginObj)) // 如果代理的对象本身就具有响应式，则不影响本身的响应式
         const changeObjShallowReactive = () => {
-            objShallowReactive.a.c.d = 'ddd' //  视图不会被更新
+             objShallowReactive.a.c.d = 'ddd' //  视图不会被更新
+           // objShallowReactive.a.c.d = 'shallowReactive代理reactive对象查看对象非第一层数据是否具有响应式'
             // objShallowReactive.aa = 222 // 视图更新
             console.log(objShallowReactive.a)
             console.log(objShallowReactive.a.c.d)
-            
         }
 
         // 14. shallowRef
@@ -715,8 +717,14 @@ export default {
             console.log(objShallowRef.value.a.c.d)
             
         }
-
-
+        
+        // markRaw标记一个对象，使它不能被代理为响应式，但是它内部的属性还是可以被代理的
+        const markRawOriginObj =  {a:11, b: { c: 2}}   
+        const markRawObj = markRaw(markRawOriginObj)
+        const markRawAObj = reactive(markRawObj)
+        const markRawOriginObjObj = reactive(markRawOriginObj)
+        const markRawBObj = reactive(markRawOriginObj.b)
+        console.log('markRaw', isReactive(markRawAObj), isReactive(markRawOriginObjObj), isReactive(markRawBObj)) // false false true
 
         return {    
             changeState,
